@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,6 +10,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
+using BlogService.Models;
 
 namespace BlogService
 {
@@ -26,6 +28,9 @@ namespace BlogService
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+
+            services.AddDbContext<BlogPostsContext>(options =>
+                    options.UseSqlServer(Configuration.GetConnectionString("BlogPostsContext")));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
