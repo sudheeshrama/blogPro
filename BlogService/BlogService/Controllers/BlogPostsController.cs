@@ -26,15 +26,20 @@ namespace BlogService.Controllers
 
         // GET: api/BlogPosts
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<BlogPost>>> GetBlogPost()
+        public IEnumerable<BlogPost> GetBlogPosts()
         {
-            return await _context.BlogPost.ToListAsync();
+            return _context.BlogPost.OrderByDescending(p => p.PostId);
         }
 
         // GET: api/BlogPosts/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<BlogPost>> GetBlogPost(int id)
+        public async Task<ActionResult<BlogPost>> GetBlogPost([FromRoute] int id)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var blogPost = await _context.BlogPost.FindAsync(id);
 
             if (blogPost == null)
@@ -42,15 +47,18 @@ namespace BlogService.Controllers
                 return NotFound();
             }
 
-            return blogPost;
+            return Ok(blogPost);
         }
 
         // PUT: api/BlogPosts/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutBlogPost(int id, BlogPost blogPost)
+        public async Task<IActionResult> PutBlogPost([FromRoute] int id, [FromBody] BlogPost blogPost)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             if (id != blogPost.PostId)
             {
                 return BadRequest();
@@ -60,7 +68,8 @@ namespace BlogService.Controllers
 
             try
             {
-                await _context.SaveChangesAsync();
+                _repo.Update(blogPost);
+                var save = await _repo.SaveAsync(blogPost);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -83,6 +92,12 @@ namespace BlogService.Controllers
         [HttpPost]
         public async Task<ActionResult<BlogPost>> PostBlogPost(BlogPost blogPost)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            _repo.Add(blogPost);
+            var save = await _repo.SaveAsync(blogPost); 
+
             _context.BlogPost.Add(blogPost);
             await _context.SaveChangesAsync();
 
@@ -93,16 +108,20 @@ namespace BlogService.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<BlogPost>> DeleteBlogPost(int id)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+
             var blogPost = await _context.BlogPost.FindAsync(id);
             if (blogPost == null)
             {
                 return NotFound();
             }
 
-            _context.BlogPost.Remove(blogPost);
-            await _context.SaveChangesAsync();
+            _repo.Delete(blogPost);
+            var save = await _repo.SaveAsync(blogPost);
 
-            return blogPost;
+            return Ok(blogPost);
         }
 
         private bool BlogPostExists(int id)
