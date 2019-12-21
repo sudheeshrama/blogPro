@@ -17,7 +17,12 @@ import { BlogPostAddEditComponent } from "./blog-post-add-edit/blog-post-add-edi
     BlogPostComponent,
     BlogPostAddEditComponent
   ],
-  imports: [BrowserModule, AppRoutingModule, ReactiveFormsModule],
+  imports: [
+    BrowserModule,
+    HttpClientModule,
+    AppRoutingModule,
+    ReactiveFormsModule
+  ],
   providers: [BlogPostService],
   bootstrap: [AppComponent]
 })
